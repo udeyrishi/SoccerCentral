@@ -3,11 +3,13 @@ package com.udeyrishi.soccercentral.api
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
+import com.udeyrishi.soccercentral.BuildConfig
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.money.Money
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -45,7 +47,7 @@ interface SoccerDataService {
                 .setDateFormat(DATE_FORMAT)
                 .create()
 
-        private fun createHeaderInterceptor(authToken: String) = Interceptor {
+        private fun createRequestHeaderInjector(authToken: String) = Interceptor {
             it.proceed(it.request().newBuilder()
                     .addHeader("Content-Type", "application/json")
                     .addHeader("X-Auth-Token", authToken)
@@ -53,6 +55,13 @@ interface SoccerDataService {
                     .build()
             )
         }
+
+        private fun createHttpClient(authToken: String) = OkHttpClient.Builder().apply {
+            addInterceptor(createRequestHeaderInjector(authToken))
+            if (BuildConfig.DEBUG) {
+                addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            }
+        }.build()
 
         private fun <T> Observable<T>.smartFetch(): Observable<T> = this.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
@@ -66,7 +75,7 @@ interface SoccerDataService {
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(createGson()))
                     .baseUrl(apiUrl)
-                    .client(OkHttpClient.Builder().addInterceptor(createHeaderInterceptor(authToken)).build())
+                    .client(createHttpClient(authToken))
                     .build()
                     .create(SoccerDataService::class.java)
             )
