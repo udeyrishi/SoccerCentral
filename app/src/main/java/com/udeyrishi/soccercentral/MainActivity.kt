@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.TextView
-import com.udeyrishi.soccercentral.api.smartFetch
 import io.reactivex.disposables.Disposable
 
 class MainActivity : AppCompatActivity() {
@@ -23,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        disposable = App.instance.soccerDataService.getSeasons().smartFetch().subscribe(
+        disposable = App.instance.soccerDataService.getSeasons().subscribe(
                 { seasons -> textView.text = seasons[0].toString() },
                 { Log.e(LOG_TAG, it.message) }
         )
