@@ -12,15 +12,12 @@ class MainActivity : LifecycleActivity() {
         val LOG_TAG: String = MainActivity::class.java.name
     }
 
-    lateinit var textView: TextView
-    lateinit var requestManager: RequestManager
+    val textView: TextView by lazy { findViewById<TextView>(R.id.text_view) }
+    val requestManager by lazy { RequestManager().apply { lifecycle.addObserver(this) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        textView = findViewById<TextView>(R.id.text_view)
-        requestManager = RequestManager()
-        lifecycle.addObserver(requestManager)
     }
 
     override fun onResume() {
