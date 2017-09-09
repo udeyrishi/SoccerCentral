@@ -1,1 +1,1 @@
-Sample playground app to test out Kotlin + RxJava
+Sample playground app to test out Kotlin + RxJava + Android architecture components
