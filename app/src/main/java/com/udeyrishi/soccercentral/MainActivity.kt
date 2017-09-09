@@ -2,18 +2,15 @@ package com.udeyrishi.soccercentral
 
 import android.arch.lifecycle.LifecycleActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import com.udeyrishi.soccercentral.api.RequestManager
 import com.udeyrishi.soccercentral.api.managedSubscribe
+import io.reactivex.Observable
 
 class MainActivity : LifecycleActivity() {
-    companion object {
-        val LOG_TAG: String = MainActivity::class.java.name
-    }
-
-    val textView: TextView by lazy { findViewById<TextView>(R.id.text_view) }
-    val requestManager by lazy { RequestManager().apply { lifecycle.addObserver(this) } }
+    private val textView: TextView by lazy { findViewById<TextView>(R.id.text_view) }
+    private val requestManager by lazy { RequestManager().apply { lifecycle.addObserver(this) } }
+    private val soccerDataService get() = App.instance.soccerDataService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,10 +19,11 @@ class MainActivity : LifecycleActivity() {
 
     override fun onResume() {
         super.onResume()
-        App.instance.soccerDataService.getSeasons().managedSubscribe(
-                requestManager,
-                { seasons -> textView.text = seasons[0].toString() },
-                { Log.e(LOG_TAG, it.message) }
-        )
+        soccerDataService
+                .getSeasons()
+                .flatMap { seasons -> Observable.just(seasons[0].id) }
+                .flatMap { soccerDataService.getTeams(it) }
+                .flatMap { teams -> Observable.just(teams[0]) }
+                .managedSubscribe(requestManager, { textView.text = it.toString() })
     }
 }

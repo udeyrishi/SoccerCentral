@@ -28,7 +28,11 @@ class RequestManager: LifecycleObserver {
     }
 }
 
-fun <T> Observable<T>.managedSubscribe(requestManager: RequestManager, resolve: (T) -> Unit, reject: (Throwable) -> Unit): Disposable {
+fun <T> Observable<T>.managedSubscribe(
+        requestManager: RequestManager,
+        resolve: (T) -> Unit = { },
+        reject: (Throwable) -> Unit = { throw it }): Disposable {
+
     val lock = Any()
 
     // Need to sync this in case this function call and the consume/onError callbacks happen

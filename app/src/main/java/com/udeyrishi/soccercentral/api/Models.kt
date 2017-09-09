@@ -1,5 +1,7 @@
 package com.udeyrishi.soccercentral.api
 
+import org.joda.money.Money
+import java.net.URL
 import java.util.*
 
 /**
@@ -24,3 +26,11 @@ data class Season(val id: Int,
                   val numberOfMatchdays: Int,
                   val numberOfTeams: Int,
                   val lastUpdated: Date)
+
+data class Team(val id: Int,
+                val name: String,
+                val shortName: String?,
+                val squadMarketValue: Money?,
+                val crestUrl: URL?)
+
+class TeamList(size: Int): ArrayList<Team>(size)
